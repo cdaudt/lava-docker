@@ -55,9 +55,13 @@ RUN useradd -m -G plugdev lava \
 COPY submittestjob.sh /home/lava/bin/
 COPY *.json *.py *.yaml /home/lava/bin/
 
+RUN mkdir -p /etc/lava-dispatcher/devices \
+ && mkdir -p /etc/lava-dispatcher/device-types
+
 # Add misc utilities
 COPY createsuperuser.sh add-devices-to-lava.sh getAPItoken.sh lava-credentials.txt /home/lava/bin/
-COPY qemu-cortex-m3-01.jinja2 /etc/dispatcher-config/devices/
+COPY qemu-aarch64-01.conf qemu-aarch64-02.conf qemu-arm-01.conf qemu-arm-02.conf qemu-arm-cortex-a9-01.conf qemu-arm-cortex-a9-02.conf qemu-arm-cortex-a15-01.conf qemu-arm-cortex-a15-02.conf qemu-i386-01.conf qemu-i386-02.conf kvm-01.conf kvm-02.conf /etc/lava-dispatcher/devices/
+COPY qemu-i386.conf /etc/lava-dispatcher/device-types/
 
 # (Optional) Add lava user SSH key and/or configuration
 # or mount a host file as a data volume (read-only)
@@ -67,43 +71,26 @@ COPY qemu-cortex-m3-01.jinja2 /etc/dispatcher-config/devices/
 # Remove comment to enable local proxy server (e.g. apt-cacher-ng)
 #RUN echo 'Acquire::http { Proxy "http://dockerproxy:3142"; };' >> /etc/apt/apt.conf.d/01proxy
 
-# Create a admin user (Insecure note, this creates a default user, username: admin/admin)
+# Create a admin user (Insecure note, this creates a default user, username: kernel-ci/shazbot)
 RUN /start.sh \
  && /home/lava/bin/createsuperuser.sh \
  && /stop.sh
 
-# CORTEX-M3: add python-sphinx-bootstrap-theme
+# LATEST: add python-sphinx-bootstrap-theme
 RUN sudo apt-get update && apt-get install -y python-sphinx-bootstrap-theme node-uglify docbook-xsl xsltproc python-mock \
  && rm -rf /var/lib/apt/lists/*
 
-COPY do-not-validate-actions.patch /home/lava/bin
-
-# CORTEX-M3: apply patches to enable cortex-m3 support
+# Deploy the latest release branch
 RUN /start.sh \
- && echo "CORTEX-M3: adding patches for lava-dispatcher" \
- && git clone -b master https://git.linaro.org/lava/lava-dispatcher.git /home/lava/lava-dispatcher \
- && cd /home/lava/lava-dispatcher \
- && git checkout 8753b43 \
- && git fetch https://review.linaro.org/lava/lava-dispatcher refs/changes/11/12711/9 && git cherry-pick FETCH_HEAD \
- && echo "CORTEX-M3: adding patches for lava-server" \
- && git clone -b master https://git.linaro.org/lava/lava-server.git /home/lava/lava-server \
- # && cd /home/lava/lava-server && git checkout 30facc1290ad2dd28ed4ad41ff971546e360f92e \
- && cd /home/lava/lava-server \
- && git fetch https://review.linaro.org/lava/lava-server refs/changes/70/12670/1 && git cherry-pick FETCH_HEAD \
- && git apply /home/lava/bin/do-not-validate-actions.patch \
- && echo "CORTEX-M3: add build then install capability to debian-dev-build.sh" \
+ && git clone -b release https://git.linaro.org/lava/lava-dispatcher.git /home/lava/lava-dispatcher \
+ && git clone -b release https://git.linaro.org/lava/lava-server.git /home/lava/lava-server \
  && echo "cd \${DIR} && dpkg -i *.deb" >> /home/lava/lava-server/share/debian-dev-build.sh \
- && echo "CORTEX-M3: Installing patched versions of dispatcher & server" \
+ && echo "Installing latest released versions of dispatcher & server" \
  && cd /home/lava/lava-dispatcher && /home/lava/lava-server/share/debian-dev-build.sh -p lava-dispatcher \
  && cd /home/lava/lava-server && /home/lava/lava-server/share/debian-dev-build.sh -p lava-server \
  && /stop.sh
 
-# To run jobs using python XMLRPC, we need the API token (really ugly)
-RUN /start.sh \
- && /home/lava/bin/getAPItoken.sh \
- && /stop.sh
-
 EXPOSE 22 80
-CMD /start.sh && bash
+CMD /start.sh && /home/lava/bin/getAPItoken.sh && /home/lava/bin/add-devices-to-lava.sh && bash
 # Following CMD option starts the lava container without a shell and exposes the logs
 #CMD /start.sh && tail -f /var/log/lava-*/*

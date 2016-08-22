@@ -1,11 +1,11 @@
 #!/usr/bin/expect -f
 spawn lava-server manage createsuperuser
 expect "Username (leave blank to use 'root'):"
-send "admin\r"
+send "kernel-ci\r"
 expect "Email address:"
-send "admin@localhost\r"
+send "kernel-ci@localhost\r"
 expect "Password:"
-send "admin\r"
+send "shazbot\r"
 expect "Password (again):"
-send "admin\r"
+send "shazbot\r"
 expect "Superuser created successfully."

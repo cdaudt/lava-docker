@@ -89,7 +89,7 @@ def monitorJob(jobid, server, server_str):
 def process():
     print "Submitting test job to LAVA server"
     loadConfiguration()
-    user = "admin"
+    user = "kernel-ci"
     with open(args.apikey) as f:
         line = f.readline()
         apikey = line.rstrip('\n')
