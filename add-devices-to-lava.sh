@@ -20,6 +20,11 @@ csrf="csrfmiddlewaretoken="$(grep csrftoken ${tools_path}/cookies.txt | cut -d$'
 login=$csrf\&username=$adminuser\&password=$adminpass; echo $login
 curl -b ${tools_path}/cookies.txt -c ${tools_path}/cookies.txt -d $login -X POST $lavaurl/admin/login/
 
+#create lava-slave
+csrf="csrfmiddlewaretoken="$(grep csrftoken ${tools_path}/cookies.txt | cut -d$'\t' -f 7); echo "$csrf"
+work=$csrf\&hostname="lava-slave"; echo $login
+curl -b ${tools_path}/cookies.txt -c ${tools_path}/cookies.txt -d $work -X POST $lavaurl/admin/lava_scheduler_app/worker/add/
+
 mkdir -p /etc/dispatcher-config/devices
 
 COUNTER=1
@@ -34,8 +39,31 @@ while [ $COUNTER -lt $1 ]; do
 	## Add device
 	csrf="csrfmiddlewaretoken="$(cat  ${tools_path}/cookies.txt | grep csrftoken | cut -d$'\t' -f 7)
 	createdevice=$csrf\&hostname=$devicename\&device_type=$devicetype\&device_version=1\&status=1\&health_status=0\&is_pipeline="on"\&worker_host=$hostn
-
 	curl -b ${tools_path}/cookies.txt -c ${tools_path}/cookies.txt -d $createdevice -X POST $lavaurl/admin/lava_scheduler_app/device/add/
 	lava-server manage device-dictionary --hostname qemu-$COUNTER --import /etc/dispatcher-config/devices/qemu.jinja2
 	let COUNTER=COUNTER+1
 done
+
+devicename=nrf52-nitrogen-01
+devicetype=nrf52-nitrogen
+# Add device type
+csrf="csrfmiddlewaretoken="$(cat  ${tools_path}/cookies.txt | grep csrftoken | cut -d$'\t' -f 7)
+createdevicetype=$csrf\&name=$devicetype\&display=on\&health_frequency=24\&_save=Save\&health_denominator=0
+curl -b ${tools_path}/cookies.txt -c ${tools_path}/cookies.txt -d $createdevicetype -X POST $lavaurl/admin/lava_scheduler_app/devicetype/add/
+## Add device
+csrf="csrfmiddlewaretoken="$(cat  ${tools_path}/cookies.txt | grep csrftoken | cut -d$'\t' -f 7)
+createdevice=$csrf\&hostname=$devicename\&device_type=$devicetype\&device_version=1\&status=1\&health_status=0\&is_pipeline="on"\&worker_host=lava-slave
+curl -b ${tools_path}/cookies.txt -c ${tools_path}/cookies.txt -d $createdevice -X POST $lavaurl/admin/lava_scheduler_app/device/add/
+lava-server manage device-dictionary --hostname nrf52-nitrogen-01 --import /etc/dispatcher-config/devices/nrf52-nitrogen.jinja2
+
+devicename=nxp-k64f-01
+devicetype=nxp-k64f
+# Add device type
+csrf="csrfmiddlewaretoken="$(cat  ${tools_path}/cookies.txt | grep csrftoken | cut -d$'\t' -f 7)
+createdevicetype=$csrf\&name=$devicetype\&display=on\&health_frequency=24\&_save=Save\&health_denominator=0
+curl -b ${tools_path}/cookies.txt -c ${tools_path}/cookies.txt -d $createdevicetype -X POST $lavaurl/admin/lava_scheduler_app/devicetype/add/
+## Add device
+csrf="csrfmiddlewaretoken="$(cat  ${tools_path}/cookies.txt | grep csrftoken | cut -d$'\t' -f 7)
+createdevice=$csrf\&hostname=$devicename\&device_type=$devicetype\&device_version=1\&status=1\&health_status=0\&is_pipeline="on"\&worker_host=lava-slave
+curl -b ${tools_path}/cookies.txt -c ${tools_path}/cookies.txt -d $createdevice -X POST $lavaurl/admin/lava_scheduler_app/device/add/
+lava-server manage device-dictionary --hostname nxp-k64f-01 --import /etc/dispatcher-config/devices/nxp-k64f.jinja2

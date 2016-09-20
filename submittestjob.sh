@@ -12,4 +12,6 @@ echo "Submit v2/pipeline Zephyr qemu-cortex-m3 crypto tests"
 ./submityaml.py -k apikey.txt job6.yaml
 ./submityaml.py -k apikey.txt job7.yaml
 ./submityaml.py -k apikey.txt job8.yaml
-./submityaml.py -k apikey.txt -p job9.yaml
+./submityaml.py -k apikey.txt job9.yaml
+./submityaml.py -k apikey.txt job10.yaml
+./submityaml.py -k apikey.txt job11.yaml

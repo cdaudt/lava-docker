@@ -35,14 +35,6 @@ RUN echo 'lava-server   lava-server/instance-name string lava-docker-instance' |
  && /stop.sh \
  && rm -rf /var/lib/apt/lists/*
 
-# (Optional) Add lava user SSH key and/or configuration
-# or mount a host file as a data volume (read-only)
-# e.g. -v /path/to/id_rsa_lava.pub:/home/lava/.ssh/authorized_keys:ro
-#COPY lava-credentials/.ssh /home/lava/.ssh
-
-# Remove comment to enable local proxy server (e.g. apt-cacher-ng)
-#RUN echo 'Acquire::http { Proxy "http://dockerproxy:3142"; };' >> /etc/apt/apt.conf.d/01proxy
-
 # Add lava user with super-user privilege
 RUN useradd -m -G plugdev lava \
  && echo 'lava ALL = NOPASSWD: ALL' > /etc/sudoers.d/lava \
@@ -58,14 +50,8 @@ COPY *.json *.py *.yaml /home/lava/bin/
 # Add misc utilities
 COPY createsuperuser.sh add-devices-to-lava.sh getAPItoken.sh lava-credentials.txt /home/lava/bin/
 COPY qemu.jinja2 /etc/dispatcher-config/devices/
-
-# (Optional) Add lava user SSH key and/or configuration
-# or mount a host file as a data volume (read-only)
-# e.g. -v /path/to/id_rsa_lava.pub:/home/lava/.ssh/authorized_keys:ro
-#COPY lava-credentials/.ssh /home/lava/.ssh
-
-# Remove comment to enable local proxy server (e.g. apt-cacher-ng)
-#RUN echo 'Acquire::http { Proxy "http://dockerproxy:3142"; };' >> /etc/apt/apt.conf.d/01proxy
+COPY nrf52-nitrogen.jinja2 /etc/dispatcher-config/devices/
+COPY nxp-k64f.jinja2 /etc/dispatcher-config/devices/
 
 # Create a admin user (Insecure note, this creates a default user, username: admin/admin)
 RUN /start.sh \
@@ -76,17 +62,15 @@ RUN /start.sh \
 RUN sudo apt-get update && apt-get install -y python-sphinx-bootstrap-theme node-uglify docbook-xsl xsltproc python-mock \
  && rm -rf /var/lib/apt/lists/*
 
-COPY do-not-validate-actions.patch /home/lava/bin
-
 # CORTEX-M3: apply patches to enable cortex-m3 support
 RUN /start.sh \
- && echo "CORTEX-M3: adding patches for lava-dispatcher" \
  && git clone -b master https://git.linaro.org/lava/lava-dispatcher.git /home/lava/lava-dispatcher \
  && cd /home/lava/lava-dispatcher \
+ && git fetch https://review.linaro.org/lava/lava-dispatcher refs/changes/08/14408/14 && git cherry-pick FETCH_HEAD \
  && git clone -b master https://git.linaro.org/lava/lava-server.git /home/lava/lava-server \
- # && cd /home/lava/lava-server && git checkout 30facc1290ad2dd28ed4ad41ff971546e360f92e \
  && cd /home/lava/lava-server \
- && git fetch https://review.linaro.org/lava/lava-server refs/changes/70/12670/1 && git cherry-pick FETCH_HEAD \
+ && git fetch https://review.linaro.org/lava/lava-server refs/changes/09/14409/5 && git cherry-pick FETCH_HEAD \
+ && git fetch https://review.linaro.org/lava/lava-server refs/changes/10/14410/1 && git cherry-pick FETCH_HEAD \
  && echo "CORTEX-M3: add build then install capability to debian-dev-build.sh" \
  && echo "cd \${DIR} && dpkg -i *.deb" >> /home/lava/lava-server/share/debian-dev-build.sh \
  && echo "CORTEX-M3: Installing patched versions of dispatcher & server" \
@@ -99,7 +83,5 @@ RUN /start.sh \
  && /home/lava/bin/getAPItoken.sh \
  && /stop.sh
 
-EXPOSE 22 80
+EXPOSE 22 80 5555 5556
 CMD /start.sh && /home/lava/bin/add-devices-to-lava.sh 41 && bash
-# Following CMD option starts the lava container without a shell and exposes the logs
-#CMD /start.sh && tail -f /var/log/lava-*/*

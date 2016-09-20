@@ -1,0 +1,37 @@
+# Zephyr JOB definition for nrf52-nitrogen
+device_type: nrf52-nitrogen
+job_name: nrf52-nitrogen-test
+
+timeouts:
+  job:
+    minutes: 6
+  action:
+    minutes: 2
+priority: medium
+visibility: public
+
+actions:
+- deploy:
+    timeout:
+      minutes: 3
+    to: tmpfs
+    type: monitor
+    images: 
+        zephyr: 
+          image_arg: -a 0x8000 {zephyr}
+          url: http://192.168.1.2:5000/8944ebb6e599e7ef359ccb02da6912dc69e62b63944d24c63b856706/nrf52_nitrogen/samples/linaro_fota/zephyr-signed-dfu.bin
+
+- boot:
+    method: monitor
+    timeout:
+      minutes: 2
+
+- test:
+    monitors:
+    - name: Test Linaro FOTA
+      start: Starting FOTA Service Fiber
+      end: fota_service
+      pattern: (?P<result>(PASS|FAIL))\s-\s(?P<test_case_id>\w+)
+      fixupdict:
+        PASS: pass
+        FAIL: fail
