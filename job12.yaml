@@ -1,0 +1,37 @@
+# Zephyr JOB definition for stm32-carbon
+device_type: stm32-carbon
+job_name: stm32-carbon-test
+
+timeouts:
+  job:
+    minutes: 6
+  action:
+    minutes: 2
+priority: medium
+visibility: public
+
+actions:
+- deploy:
+    timeout:
+      minutes: 3
+    to: tmpfs
+    type: monitor
+    images: 
+        zephyr: 
+          image_arg: -D {zephyr} -s 0x08020000
+          url: http://192.168.1.2:5000/eb0ec12c1070df411f6c8843bd805a2d48cbacbc92d176d5f7d6c2ce/carbon/samples/linaro_fota/zephyr-signed-dfu.bin
+
+- boot:
+    method: monitor
+    timeout:
+      minutes: 2
+
+- test:
+    monitors:
+    - name: Test STM32 Carbon Linaro FOTA
+      start: tc_start()
+      end: Enabling Bluetooth
+      pattern: (?P<result>(PASS|FAIL))\s-\s(?P<test_case_id>\w+)
+      fixupdict:
+        PASS: pass
+        FAIL: fail
