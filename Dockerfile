@@ -46,6 +46,7 @@ RUN useradd -m -G plugdev lava \
 # Add some job submission utilities
 COPY submittestjob.sh /home/lava/bin/
 COPY *.json *.py *.yaml /home/lava/bin/
+COPY carry/ /root/carry/
 
 # Add misc utilities
 COPY createsuperuser.sh add-devices-to-lava.sh getAPItoken.sh lava-credentials.txt /home/lava/bin/
@@ -71,12 +72,8 @@ RUN apt-get clean && apt-get update && apt-get install -y python-sphinx-bootstra
 RUN /start.sh \
  && git clone -b master https://git.linaro.org/lava/lava-dispatcher.git /home/lava/lava-dispatcher \
  && cd /home/lava/lava-dispatcher \
- && git fetch https://review.linaro.org/lava/lava-dispatcher refs/changes/08/14408/17 && git cherry-pick FETCH_HEAD \
- && git fetch https://review.linaro.org/lava/lava-dispatcher refs/changes/84/14484/7 && git cherry-pick FETCH_HEAD \
  && git clone -b master https://git.linaro.org/lava/lava-server.git /home/lava/lava-server \
  && cd /home/lava/lava-server \
- && git fetch https://review.linaro.org/lava/lava-server refs/changes/09/14409/5 && git cherry-pick FETCH_HEAD \
- && git fetch https://review.linaro.org/lava/lava-server refs/changes/10/14410/1 && git cherry-pick FETCH_HEAD \
  && git fetch https://review.linaro.org/lava/lava-server refs/changes/83/14483/3 && git cherry-pick FETCH_HEAD \
  && git apply /home/lava/hack.patch \
  && echo "CORTEX-M3: add build then install capability to debian-dev-build.sh" \
