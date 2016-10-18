@@ -50,7 +50,6 @@ COPY carry/ /root/carry/
 
 # Add misc utilities
 COPY createsuperuser.sh add-devices-to-lava.sh getAPItoken.sh lava-credentials.txt /home/lava/bin/
-COPY hack.patch /home/lava/hack.patch
 COPY qemu.jinja2 /etc/dispatcher-config/devices/
 COPY nrf52-nitrogen.jinja2 /etc/dispatcher-config/devices/
 COPY nxp-k64f.jinja2 /etc/dispatcher-config/devices/
@@ -70,12 +69,10 @@ RUN apt-get clean && apt-get update && apt-get install -y python-sphinx-bootstra
 
 # CORTEX-M3: apply patches to enable cortex-m3 support
 RUN /start.sh \
- && git clone -b master https://git.linaro.org/lava/lava-dispatcher.git /home/lava/lava-dispatcher \
+ && git clone -b proj/add_wiced git://10.136.64.138/git/lava-dispatcher /home/lava/lava-dispatcher \
  && cd /home/lava/lava-dispatcher \
- && git clone -b master https://git.linaro.org/lava/lava-server.git /home/lava/lava-server \
+ && git clone -b proj/add_wiced git://10.136.64.138/git/lava-server /home/lava/lava-server \
  && cd /home/lava/lava-server \
- && git fetch https://review.linaro.org/lava/lava-server refs/changes/83/14483/3 && git cherry-pick FETCH_HEAD \
- && git apply /home/lava/hack.patch \
  && echo "CORTEX-M3: add build then install capability to debian-dev-build.sh" \
  && echo "cd \${DIR} && dpkg -i *.deb" >> /home/lava/lava-server/share/debian-dev-build.sh \
  && echo "CORTEX-M3: Installing patched versions of dispatcher & server" \
