@@ -58,6 +58,11 @@ COPY stm32-carbon-02.jinja2 /etc/dispatcher-config/devices/
 COPY stm32-carbon-03.jinja2 /etc/dispatcher-config/devices/
 COPY stm32-carbon-04.jinja2 /etc/dispatcher-config/devices/
 
+#WICED devices
+COPY 943907AEVAL1F-1.jinja2 /etc/dispatcher-config/devices/
+COPY 943907AEVAL1F.jinja2   /etc/lava-server/dispatcher-config/device-types/
+
+
 # Create a admin user (Insecure note, this creates a default user, username: admin/admin)
 RUN /start.sh \
  && /home/lava/bin/createsuperuser.sh \
