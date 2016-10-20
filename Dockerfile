@@ -1,8 +1,15 @@
 FROM debian:jessie-backports
 
-# Add services helper utilities to start and stop LAVA
-COPY stop.sh .
-COPY start.sh .
+
+# Add linaro staging repo
+RUN apt-get clean && \
+ apt-get update && \
+ apt-get install -y wget
+
+RUN cd /tmp && \
+ wget http://images.validation.linaro.org/staging-repo/staging-repo.key.asc &&  \
+ apt-key add staging-repo.key.asc  && \
+ echo "deb http://images.validation.linaro.org/staging-repo sid main"  >>/etc/apt/sources.list.d/linaro.list
 
 # Install debian packages used by the container
 # Configure apache to run the lava server
@@ -10,7 +17,7 @@ COPY start.sh .
 RUN echo 'lava-server   lava-server/instance-name string lava-docker-instance' | debconf-set-selections \
  && echo 'locales locales/locales_to_be_generated multiselect C.UTF-8 UTF-8, en_US.UTF-8 UTF-8 ' | debconf-set-selections \
  && echo 'locales locales/default_environment_locale select en_US.UTF-8' | debconf-set-selections \
- && apt-get clean && apt-get update \
+ && apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y \
  android-tools-fastboot \
  cu \
@@ -25,13 +32,24 @@ RUN echo 'lava-server   lava-server/instance-name string lava-docker-instance' |
  postgresql \
  screen \
  sudo \
+ gunicorn \
  vim \
  && service postgresql start \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y -t jessie-backports \
  lava \
  qemu-system \
  && a2dissite 000-default \
- && a2ensite lava-server \
+ && a2enmod proxy \
+ && a2enmod proxy_http
+
+RUN service gunicorn restart \
+ && service apache2 restart
+
+# Add services helper utilities to start and stop LAVA
+COPY stop.sh .
+COPY start.sh .
+
+RUN a2ensite lava-server \
  && /stop.sh \
  && rm -rf /var/lib/apt/lists/*
 
@@ -62,7 +80,6 @@ COPY stm32-carbon-04.jinja2 /etc/dispatcher-config/devices/
 COPY 943907AEVAL1F-1.jinja2 /etc/dispatcher-config/devices/
 COPY 943907AEVAL1F.jinja2   /etc/lava-server/dispatcher-config/device-types/
 
-
 # Create a admin user (Insecure note, this creates a default user, username: admin/admin)
 RUN /start.sh \
  && /home/lava/bin/createsuperuser.sh \
@@ -78,6 +95,7 @@ RUN /start.sh \
  && cd /home/lava/lava-dispatcher \
  && git clone -b proj/add_wiced git://10.136.64.138/git/lava-server /home/lava/lava-server \
  && cd /home/lava/lava-server \
+ && git checkout -b wip e1866b72f32ad9e61ae11bad25519a1b9b70d9d7 \
  && echo "CORTEX-M3: add build then install capability to debian-dev-build.sh" \
  && echo "cd \${DIR} && dpkg -i *.deb" >> /home/lava/lava-server/share/debian-dev-build.sh \
  && echo "CORTEX-M3: Installing patched versions of dispatcher & server" \
