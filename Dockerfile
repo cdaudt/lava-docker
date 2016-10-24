@@ -93,6 +93,7 @@ RUN apt-get clean && apt-get update && apt-get install -y python-sphinx-bootstra
 RUN /start.sh \
  && git clone -b proj/add_wiced git://10.136.64.138/git/lava-dispatcher /home/lava/lava-dispatcher \
  && cd /home/lava/lava-dispatcher \
+ && git checkout -b wip 250e29bdef3ae30954f57f852d251fe776d6b180 \
  && git clone -b proj/add_wiced git://10.136.64.138/git/lava-server /home/lava/lava-server \
  && cd /home/lava/lava-server \
  && git checkout -b wip e1866b72f32ad9e61ae11bad25519a1b9b70d9d7 \
