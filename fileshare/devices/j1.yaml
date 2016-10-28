@@ -1,0 +1,36 @@
+device_type: ifc6410plus
+job_name: singlenode-jessie
+timeouts:
+ job: 
+  minutes: 15
+priority: medium
+visibility: public
+
+actions:
+- deploy:
+    timeout:
+      minutes: 30
+    to: fastboot
+    os: debian
+    methods:
+      fastboot:
+       boot: "https://snapshots.linaro.org/debian/pre-built/snapdragon/76/boot-qcom-apq8064-ifc6410-qcom-snapdragon-20160824-76.img.gz"
+       userdata: "https://snapshots.linaro.org/debian/pre-built/snapdragon/76/linaro-jessie-developer-qcom-snapdragon-20160824-76.img.gz"
+       system: "https://snapshots.linaro.org/debian/pre-built/snapdragon/76/firmware-qcom-snapdragon-20160824-76.img.gz"
+    connections:
+      serial:
+- boot:
+    prompts: 
+    - 'root@(.*):/#'
+    timeout:
+      minutes: 5
+    method: fastboot
+
+- test:
+   timeout: 
+     minutes: 5
+   defitions:
+   - repository: http://git.linaro.org/qa/test-definitions.git
+     from: git
+     path: ubuntu/device-tree.yaml
+     name: devicetree

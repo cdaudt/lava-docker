@@ -1,0 +1,52 @@
+{% extends 'base.jinja2' %}
+{% block body %}
+
+
+device_type: cm-fx6
+{% set console_device = console_device | default('ttymxc3') %}
+{% set baud_rate = baud_rate | default(115200) %}
+
+# allow job context override - use a different variable name, undefined if not in job context
+{% set base_nfsroot_args = nfsroot_args | default(base_nfsroot_args) %}
+{% set base_kernel_args = extra_kernel_args | default(base_kernel_args) %}
+{% set kernel_logs = kernel_loglevel | default('debug') %}
+{% set early_con = early_args | default('earlycon=uart8250-32bit,0x1c020000') %}
+
+{% block vland %}
+{# If super() is to be added, remove the parameters: top level block below #}
+{% endblock %}
+
+parameters:
+   bootz:
+    kernel: '{{ bootm_kernel_addr|default('0x10800000') }}'
+    ramdisk: '{{ bootm_ramdisk_addr|default('0x12800000') }}'
+    dtb: '{{ bootm_dtb_addr|default('0x15000000') }}'
+
+actions:
+  deploy:
+    parameters:
+      add_header: u-boot
+      mkimage_arch: {{ uboot_mkimage_arch|default('arm32') }}
+    methods:
+      tftp:
+
+  boot:
+    connections:
+      serial:
+      ssh:
+    methods:
+       ssh:
+       u-boot:
+        parameters:
+          bootloader_prompt: {{ bootloader_prompt|default('CM-FX6 #') }}
+          boot_message: {{ boot_message|default('Starting kernel') }}
+        nfs:
+          commands:
+          - setenv autoload no
+{{ base_uboot_addr_commands }}
+{{ base_tftp_commands }}
+          # Always quote the entire string if the command includes a colon to support correct YAML.
+          - "setenv nfsargs 'setenv bootargs root=/dev/nfs rw {{ base_nfsroot_args }} panic=1 console={{ console_device }},{{ baud_rate }}n8 debug ip=dhcp'"
+{{ base_nfs_uboot_bootcmd }}
+
+{% endblock %}

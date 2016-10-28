@@ -1,0 +1,26 @@
+{% extends 'base.jinja2' %}
+{% block body %}
+
+
+device_type: ifc6410plus
+fastboot_serial_number: {{ fastboot_serial_number | default('0000000000') }}
+device_path: {{ [device_path] | default(['none']) }}
+
+actions:
+  deploy:
+    methods:
+      lxc:
+      fastboot:
+      tftp:
+    connections:
+      lxc:
+      serial:
+  boot:
+    connections:
+      lxc:
+    methods:
+      lxc:
+      fastboot:
+
+{% endblock %}
+

@@ -1,0 +1,53 @@
+commands:
+  connect: telnet rodan 2000
+  hard_reset: /usr/bin/pduclient --daemon lava --hostname 10.136.64.17 --command=reboot --port=04
+  power_off: /usr/bin/pduclient --daemon lava --hostname 10.136.64.17 --command=off --port=04
+  power_on: /usr/bin/pduclient --daemon lava --hostname 10.136.64.17 --command=on --port=04
+
+device_type: cm-fx6
+
+parameters:
+  bootz:
+    kernel: '0x10800000'
+    ramdisk: '0x12800000'
+    dtb: '0x15000000'
+actions:
+  deploy:
+    methods:
+    - tftp
+  boot:
+    prompts:
+      - 'CM-FX6 # '
+      - 'root@cm-fx6:~#'
+    methods:
+      u-boot:
+        parameters:
+          bootloader_prompt: 'CM-FX6 # '
+          boot_message: Starting kernel
+        nfs:
+          commands:
+          - setenv autoload no
+          - setenv kernel_addr_r '{KERNEL_ADDR}'
+          - setenv fdt_addr_r '{DTB_ADDR}'
+          - setenv bootm_low '0x15000000'
+          - setenv loadkernel 'tftp ${kernel_addr_r} {KERNEL}'
+          - setenv loadinitrd 'tftp ${initrd_addr_r} {RAMDISK}'
+          - setenv loadfdt 'tftp ${fdt_addr_r} {DTB}'
+          - "setenv nfsargs 'setenv bootargs root=/dev/nfs rw nfsroot={NFS_SERVER_IP}:{NFSROOTFS},tcp,hard,intr panic=1 console=ttymxc3,115200n8 debug ip=dhcp'"
+          - setenv bootcmd 'dhcp; setenv serverip {SERVER_IP}; run loadkernel; run loadinitrd; run loadfdt; run nfsargs; {BOOTX}'
+          - boot
+
+timeouts:
+  actions:
+   apply-overlay-image:
+     seconds: 120
+   umount-retry:
+     seconds: 45
+   lava-test-shell:
+     seconds: 30
+  power_off:
+    seconds: 5
+  connections:
+    uboot-retry:
+      seconds: 60
+
