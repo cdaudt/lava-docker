@@ -11,4 +11,4 @@ docker run -it \
   -p 2022:22 \
   -h lava-docker \
   --privileged \
-  lava-master
+  lava-master $*
