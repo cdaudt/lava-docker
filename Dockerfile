@@ -109,5 +109,6 @@ RUN /start.sh \
  && /home/lava/bin/getAPItoken.sh \
  && /stop.sh
 
+COPY fileshare/ /root/fileshare-base/
 EXPOSE 22 80 5555 5556
 CMD /start.sh && /home/lava/bin/add-devices-to-lava.sh 41 && bash
