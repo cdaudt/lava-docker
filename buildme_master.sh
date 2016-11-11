@@ -1,7 +1,7 @@
 ATTEMPT=0
 while :
 do
-	docker build $* -t lava-master .
+	docker build $* -t lava/master:2016-11.1 .
 	if [ $? -eq 0 ]
 	then 
 		exit 0
