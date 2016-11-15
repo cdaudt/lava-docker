@@ -31,23 +31,6 @@ curl -b ${tools_path}/cookies.txt -c ${tools_path}/cookies.txt -d $work -X POST 
 
 mkdir -p /etc/dispatcher-config/devices
 
-COUNTER=1
-
-while [ $COUNTER -lt $1 ]; do
-	devicename=qemu-$COUNTER
-	devicetype=qemu
-	# Add device type
-	csrf="csrfmiddlewaretoken="$(cat  ${tools_path}/cookies.txt | grep csrftoken | cut -d$'\t' -f 7)
-	createdevicetype=$csrf\&name=$devicetype\&display=on\&health_frequency=24\&_save=Save\&health_denominator=0
-	curl -b ${tools_path}/cookies.txt -c ${tools_path}/cookies.txt -d $createdevicetype -X POST $lavaurl/admin/lava_scheduler_app/devicetype/add/
-	## Add device
-	csrf="csrfmiddlewaretoken="$(cat  ${tools_path}/cookies.txt | grep csrftoken | cut -d$'\t' -f 7)
-	createdevice=$csrf\&hostname=$devicename\&device_type=$devicetype\&device_version=1\&status=1\&health_status=0\&is_pipeline="on"\&worker_host=$hostn
-	curl -b ${tools_path}/cookies.txt -c ${tools_path}/cookies.txt -d $createdevice -X POST $lavaurl/admin/lava_scheduler_app/device/add/
-	lava-server manage device-dictionary --hostname qemu-$COUNTER --import /etc/dispatcher-config/devices/qemu.jinja2
-	let COUNTER=COUNTER+1
-done
-
 devicename=943907AEVAL1F-1
 devicetype=943907AEVAL1F
 # Add device type
