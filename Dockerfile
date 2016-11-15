@@ -68,6 +68,9 @@ RUN \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y \
  lava-server
 RUN \
+ DEBIAN_FRONTEND=noninteractive apt-get install -y \
+ curl
+RUN \
  a2dissite 000-default \
  && a2enmod proxy \
  && a2enmod proxy_http
