@@ -17,4 +17,14 @@ actions:
           - -d {{ debug|default('debug') }}
           - -t {{ target|default('k64f') }}
           - -f {{ frequency|default('3000000') }}
+  deploy:
+    methods:
+      pyocd:
+        parameters:
+          command:
+            /opt/cyp_ocd/wiced_ocd.py
+          options:
+          - -d {{ debug|default('debug') }}
+          - -t {{ target|default('k64f') }}
+          - -f {{ frequency|default('3000000') }}
 {% endblock -%}
