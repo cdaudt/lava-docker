@@ -11,6 +11,7 @@ fi
 lavaurl=http://localhost
 tools_path="${tools_path:-/home/lava/bin}"
 hostn=$(hostname)
+WORKER=dispatcher-3
 
 #obtain the csrf token
 data=$(curl -s -c ${tools_path}/cookies.txt $lavaurl/accounts/login/); tail ${tools_path}/cookies.txt
@@ -26,7 +27,7 @@ work=$csrf\&hostname="lava-slave"; echo $login
 curl -b ${tools_path}/cookies.txt -c ${tools_path}/cookies.txt -d $work -X POST $lavaurl/admin/lava_scheduler_app/worker/add/
 
 csrf="csrfmiddlewaretoken="$(grep csrftoken ${tools_path}/cookies.txt | cut -d$'\t' -f 7); echo "$csrf"
-work=$csrf\&hostname="lava-slave-002"; echo $login
+work=$csrf\&hostname="${WORKER}"; echo $login
 curl -b ${tools_path}/cookies.txt -c ${tools_path}/cookies.txt -d $work -X POST $lavaurl/admin/lava_scheduler_app/worker/add/
 
 mkdir -p /etc/dispatcher-config/devices
@@ -39,6 +40,6 @@ createdevicetype=$csrf\&name=$devicetype\&display=on\&health_frequency=24\&_save
 curl -b ${tools_path}/cookies.txt -c ${tools_path}/cookies.txt -d $createdevicetype -X POST $lavaurl/admin/lava_scheduler_app/devicetype/add/
 ## Add device
 csrf="csrfmiddlewaretoken="$(cat  ${tools_path}/cookies.txt | grep csrftoken | cut -d$'\t' -f 7)
-createdevice=$csrf\&hostname=$devicename\&device_type=$devicetype\&device_version=1\&status=1\&health_status=0\&is_pipeline="on"\&worker_host=lava-slave-002
+createdevice=$csrf\&hostname=$devicename\&device_type=$devicetype\&device_version=1\&status=1\&health_status=0\&is_pipeline="on"\&worker_host=${WORKER}
 curl -b ${tools_path}/cookies.txt -c ${tools_path}/cookies.txt -d $createdevice -X POST $lavaurl/admin/lava_scheduler_app/device/add/
 lava-server manage device-dictionary --hostname $devicename --import /etc/dispatcher-config/devices/$devicename.jinja2
