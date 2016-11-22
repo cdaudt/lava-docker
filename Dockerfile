@@ -24,7 +24,6 @@ RUN \
  expect \
  locales \
  openssh-server \
- postgresql \
  screen \
  sudo \
  gunicorn \
@@ -64,9 +63,16 @@ RUN \
  DEBIAN_FRONTEND=noninteractive apt-get install -y \
  lava-dispatcher
 RUN \
- service postgresql start \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y \
- lava-server
+ DEBIAN_FRONTEND=noninteractive apt-get install -y \
+ gdebi
+RUN \
+ cd /root && \
+ apt-get download lava-server && \
+ dpkg-deb --extract lava-server_*deb lava-server && \
+ dpkg-deb --control lava-server_*deb lava-server/DEBIAN && \
+ sed -i -e 's/^[\t ]*install_database$/#skip install_database/' lava-server/DEBIAN/postinst && \
+ dpkg-deb --build lava-server && \
+ echo 'y'|DEBIAN_FRONTEND=noninteractive gdebi --option=APT::Get::force-yes=1,APT::Get::Assume-Yes=1  lava-server.deb
 RUN \
  DEBIAN_FRONTEND=noninteractive apt-get install -y \
  curl
