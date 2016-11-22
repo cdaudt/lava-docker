@@ -71,6 +71,11 @@ RUN \
  dpkg-deb --extract lava-server_*deb lava-server && \
  dpkg-deb --control lava-server_*deb lava-server/DEBIAN && \
  sed -i -e 's/^[\t ]*install_database$/#skip install_database/' lava-server/DEBIAN/postinst && \
+ sed -i -e 's/postgresql,//' lava-server/DEBIAN/control  && \
+ sed -i -e 's/postgresql-common,//' lava-server/DEBIAN/control && \
+ sed -i -e 's/postgresql//' lava-server/etc/init.d/lava-server && \
+ sed -i -e 's/postgresql//' lava-server/etc/init.d/lava-server-gunicorn && \
+ sed -i -e 's/postgresql//' lava-server/etc/init.d/lava-master && \
  dpkg-deb --build lava-server && \
  echo 'y'|DEBIAN_FRONTEND=noninteractive gdebi --option=APT::Get::force-yes=1,APT::Get::Assume-Yes=1  lava-server.deb
 RUN \
@@ -107,11 +112,6 @@ COPY createsuperuser.sh add-devices-to-lava.sh getAPItoken.sh lava-credentials.t
 COPY 943907AEVAL1F-1.jinja2 /etc/dispatcher-config/devices/
 COPY 943907AEVAL1F.jinja2   /etc/lava-server/dispatcher-config/device-types/
 
-# Create a admin user (Insecure note, this creates a default user, username: admin/admin)
-RUN /start.sh \
- && /home/lava/bin/createsuperuser.sh \
- && /stop.sh
-
 # CORTEX-M3: add python-sphinx-bootstrap-theme
 RUN apt-get clean && apt-get update && apt-get install -y python-sphinx-bootstrap-theme node-uglify docbook-xsl xsltproc python-mock \
  && rm -rf /var/lib/apt/lists/*
@@ -131,11 +131,12 @@ RUN apt-get clean && apt-get update && apt-get install -y python-sphinx-bootstra
 # && cd /home/lava/lava-server && /home/lava/lava-server/share/debian-dev-build.sh -p lava-server \
 # && /stop.sh
 
-# To run jobs using python XMLRPC, we need the API token (really ugly)
-RUN /start.sh \
- && /home/lava/bin/getAPItoken.sh \
- && /stop.sh
-
 COPY fileshare/ /root/fileshare-base/
 EXPOSE 22 80 5555 5556
-CMD /start.sh && /home/lava/bin/add-devices-to-lava.sh 41 && bash
+# Create a admin user (Insecure note, this creates a default user, username: admin/admin)
+# Add devices
+CMD /start.sh && \
+  /home/lava/bin/createsuperuser.sh \
+  /home/lava/bin/getAPItoken.sh \
+  /home/lava/bin/add-devices-to-lava.sh 41 && \
+  bash

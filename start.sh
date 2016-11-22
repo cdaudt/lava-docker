@@ -24,7 +24,6 @@ start () {
 #remove lava-pid files incase the image is stored without first stopping the services
 rm -f /var/run/lava-*.pid 2> /dev/null
 
-start postgresql
 start apache2
 start gunicorn
 start lava-server
