@@ -21,6 +21,8 @@ start () {
   fi
 }
 
+# Finish config of lava-server
+dpkg --triggers-only lava-server
 #remove lava-pid files incase the image is stored without first stopping the services
 rm -f /var/run/lava-*.pid 2> /dev/null
 
