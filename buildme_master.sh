@@ -1,4 +1,4 @@
-VER="runtime0"
+VER="nosql0"
 ATTEMPT=0
 while :
 do
@@ -13,6 +13,3 @@ do
 	echo =======================================================================================
 	sleep 10m
 done
-
-docker tag lava/master:${VER} rodan.ric.broadcom.com:5000/lava/master:${VER}
-docker push  rodan.ric.broadcom.com:5000/lava/master:${VER}

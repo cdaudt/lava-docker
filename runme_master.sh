@@ -11,4 +11,4 @@ docker run -it \
  -p 2022:22 \
  -h lava-docker \
  --privileged \
- rodan.ric.broadcom.com:5000/lava/master:2016-11.1
+ lava/master:nosql0 $*
