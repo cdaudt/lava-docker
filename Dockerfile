@@ -95,6 +95,7 @@ RUN service gunicorn restart \
 # Add services helper utilities to start and stop LAVA
 COPY stop.sh .
 COPY start.sh .
+COPY cfg_postgres.sh .
 
 RUN a2ensite lava-server \
  && /stop.sh \
@@ -138,8 +139,8 @@ COPY fileshare/ /root/fileshare-base/
 EXPOSE 22 80 5555 5556
 # Create a admin user (Insecure note, this creates a default user, username: admin/admin)
 # Add devices
-CMD /start.sh && \
-  /home/lava/bin/createsuperuser.sh \
-  /home/lava/bin/getAPItoken.sh \
+CMD service postgresql start && /start.sh && \
+  /home/lava/bin/createsuperuser.sh && \
+  /home/lava/bin/getAPItoken.sh && \
   /home/lava/bin/add-devices-to-lava.sh 41 && \
   bash
