@@ -1,4 +1,5 @@
 docker run -it \
+ --link lavadb:postgres \
  -v /boot:/boot \
  -v /lib/modules:/lib/modules \
  -v $PWD/fileshare:/fileshare \
