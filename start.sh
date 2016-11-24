@@ -23,7 +23,7 @@ start () {
 
 # Finish config of lava-server
 echo "Configuring Lava user"
-/cfg_postgres.sh
+/cfg_postgres.sh || (echo "Failed to setup postgres users";exit 1)
 #remove lava-pid files incase the image is stored without first stopping the services
 rm -f /var/run/lava-*.pid 2> /dev/null
 
