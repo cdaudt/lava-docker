@@ -1,3 +1,7 @@
+./undock_postgres.sh
+sleep 2
+./dock_postgres.sh
+sleep 10
 docker run -it \
  --link lavadb:postgres \
  -v /boot:/boot \
