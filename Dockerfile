@@ -66,6 +66,15 @@ RUN \
  DEBIAN_FRONTEND=noninteractive apt-get install -y \
  gdebi
 RUN \
+ DEBIAN_FRONTEND=noninteractive apt-get install -y \
+ curl \
+ python-sphinx-bootstrap-theme \
+ node-uglify \
+ docbook-xsl \
+ xsltproc \
+ python-mock
+
+RUN \
  cd /root && \
  apt-get download lava-server && \
  dpkg-deb --extract lava-server_*deb lava-server && \
@@ -79,11 +88,10 @@ RUN \
  dpkg-deb --build lava-server && \
  mv lava-server.deb lava-server-nopostgres.deb && \
  echo 'y'|DEBIAN_FRONTEND=noninteractive gdebi --option=APT::Get::force-yes=1,APT::Get::Assume-Yes=1  lava-server-nopostgres.deb && \
- sed -i -e 's/#TEMPSKIP/    install_database/' /var/lib/dpkg/info/lava-server.postinst
+ sed -i -e 's/localhost/lavadb/' /etc/lava-server/instance.conf && \
+ echo "LAVA_DB_ROOTUSER=\"postgres\"" >>/etc/lava-server/instance.conf && \
+ echo "LAVA_DB_ROOTPASSWORD=\"lava123\"" >>/etc/lava-server/instance.conf
  
-RUN \
- DEBIAN_FRONTEND=noninteractive apt-get install -y \
- curl
 RUN \
  a2dissite 000-default \
  && a2enmod proxy \
@@ -115,10 +123,6 @@ COPY createsuperuser.sh add-devices-to-lava.sh getAPItoken.sh lava-credentials.t
 #WICED devices
 COPY 943907AEVAL1F-1.jinja2 /etc/dispatcher-config/devices/
 COPY 943907AEVAL1F.jinja2   /etc/lava-server/dispatcher-config/device-types/
-
-# CORTEX-M3: add python-sphinx-bootstrap-theme
-RUN apt-get clean && apt-get update && apt-get install -y python-sphinx-bootstrap-theme node-uglify docbook-xsl xsltproc python-mock \
- && rm -rf /var/lib/apt/lists/*
 
 # CORTEX-M3: apply patches to enable cortex-m3 support
 #RUN /start.sh \
