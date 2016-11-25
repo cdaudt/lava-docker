@@ -74,9 +74,10 @@ RUN \
  xsltproc \
  python-mock
 
+COPY lava-server_*deb /root
+
 RUN \
  cd /root && \
- apt-get download lava-server && \
  dpkg-deb --extract lava-server_*deb lava-server && \
  dpkg-deb --control lava-server_*deb lava-server/DEBIAN && \
  sed -i -e 's/^[\t ]*install_database$/#TEMPSKIP/' lava-server/DEBIAN/postinst && \
