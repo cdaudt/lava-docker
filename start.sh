@@ -1,13 +1,6 @@
 #!/bin/bash
 
 postgres-ready () {
-  echo "Waiting for lavaserver database to be active"
-  while (( $(ps -ef | grep -v grep | grep postgres | grep lavaserver | wc -l) == 0 ))
-  do
-    echo -n "."
-    sleep 1
-  done
-  echo 
   echo "[ ok ] LAVA server ready"
 }
 
@@ -24,6 +17,7 @@ start () {
 # Finish config of lava-server
 echo "Configuring Lava user"
 /cfg_postgres.sh || (echo "Failed to setup postgres users";exit 1)
+echo "Done configuring Lava user"
 #remove lava-pid files incase the image is stored without first stopping the services
 rm -f /var/run/lava-*.pid 2> /dev/null
 
