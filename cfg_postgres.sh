@@ -19,8 +19,8 @@ set -e
 
 . /etc/lava-server/instance.conf
 export PGHOST=$LAVA_DB_SERVER
-export PGPASSWORD=lava123
-export PGUSER=postgres
+export PGPASSWORD=$LAVA_DB_ROOTPASSWORD
+export PGUSER=$LAVA_DB_ROOTUSER
 export PGPORT=$LAVA_DB_PORT
 
 install_database()
