@@ -81,11 +81,6 @@ RUN \
  dpkg-deb --extract lava-server_*deb lava-server && \
  dpkg-deb --control lava-server_*deb lava-server/DEBIAN && \
  sed -i -e 's/^[\t ]*install_database$/#TEMPSKIP/' lava-server/DEBIAN/postinst && \
- sed -i -e 's/postgresql,//' lava-server/DEBIAN/control  && \
- sed -i -e 's/postgresql-common,//' lava-server/DEBIAN/control && \
- sed -i -e 's/postgresql//' lava-server/etc/init.d/lava-server && \
- sed -i -e 's/postgresql//' lava-server/etc/init.d/lava-server-gunicorn && \
- sed -i -e 's/postgresql//' lava-server/etc/init.d/lava-master && \
  dpkg-deb --build lava-server && \
  mv lava-server.deb lava-server-nopostgres.deb && \
  echo 'y'|DEBIAN_FRONTEND=noninteractive gdebi --option=APT::Get::force-yes=1,APT::Get::Assume-Yes=1  lava-server-nopostgres.deb && \
