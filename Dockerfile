@@ -84,9 +84,7 @@ RUN \
  dpkg-deb --control lava-server_*deb lava-server/DEBIAN && \
  dpkg-deb --build lava-server && \
  mv lava-server.deb lava-server-nopostgres.deb && \
- echo 'y'|DEBIAN_FRONTEND=noninteractive gdebi --option=APT::Get::force-yes=1,APT::Get::Assume-Yes=1  lava-server-nopostgres.deb && \
- echo "LAVA_DB_ROOTUSER=\"postgres\"" >>/etc/lava-server/instance.conf && \
- echo "LAVA_DB_ROOTPASSWORD=\"lava123\"" >>/etc/lava-server/instance.conf
+ echo 'y'|DEBIAN_FRONTEND=noninteractive gdebi --option=APT::Get::force-yes=1,APT::Get::Assume-Yes=1  lava-server-nopostgres.deb
  
 RUN \
  a2dissite 000-default \

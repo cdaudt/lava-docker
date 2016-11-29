@@ -9,6 +9,8 @@ docker run -it \
  -v $PWD/fileshare:/fileshare \
  -v /dev/bus/usb:/dev/bus/usb \
  -v /root/.ssh/id_rsa.pub:/home/lava.ssh/authorized_keys:ro \
+ -e LAVA_DB_ROOTUSER=postgres \
+ -e LAVA_DB_ROOTPASSWORD=lava123 \
  --device=/dev/ttyUSB0 \
  -p 8000:80 \
  -p 5555:5555 \
