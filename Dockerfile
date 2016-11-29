@@ -13,7 +13,9 @@ RUN cd /tmp && \
 # Install debian packages used by the container
 # Configure apache to run the lava server
 # Log the hostname used during install for the slave name
-RUN echo 'lava-server   lava-server/instance-name string lava-docker-instance' | debconf-set-selections \
+RUN \
+ echo 'lava-server   lava-server/instance-name string lava-docker-instance' | debconf-set-selections \
+ && echo 'lava-server   lava-server/db-server string lavadb' | debconf-set-selections \
  && echo 'locales locales/locales_to_be_generated multiselect C.UTF-8 UTF-8, en_US.UTF-8 UTF-8 ' | debconf-set-selections \
  && echo 'locales locales/default_environment_locale select en_US.UTF-8' | debconf-set-selections \
  && apt-get update
@@ -80,11 +82,9 @@ RUN \
  cd /root && \
  dpkg-deb --extract lava-server_*deb lava-server && \
  dpkg-deb --control lava-server_*deb lava-server/DEBIAN && \
- sed -i -e 's/^[\t ]*install_database$/#TEMPSKIP/' lava-server/DEBIAN/postinst && \
  dpkg-deb --build lava-server && \
  mv lava-server.deb lava-server-nopostgres.deb && \
  echo 'y'|DEBIAN_FRONTEND=noninteractive gdebi --option=APT::Get::force-yes=1,APT::Get::Assume-Yes=1  lava-server-nopostgres.deb && \
- sed -i -e 's/localhost/lavadb/' /etc/lava-server/instance.conf && \
  echo "LAVA_DB_ROOTUSER=\"postgres\"" >>/etc/lava-server/instance.conf && \
  echo "LAVA_DB_ROOTPASSWORD=\"lava123\"" >>/etc/lava-server/instance.conf
  
