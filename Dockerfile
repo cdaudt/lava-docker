@@ -116,21 +116,6 @@ COPY createsuperuser.sh add-devices-to-lava.sh getAPItoken.sh lava-credentials.t
 COPY 943907AEVAL1F-1.jinja2 /etc/dispatcher-config/devices/
 COPY 943907AEVAL1F.jinja2   /etc/lava-server/dispatcher-config/device-types/
 
-# CORTEX-M3: apply patches to enable cortex-m3 support
-#RUN /start.sh \
-# && git clone -b proj/add_wiced git://10.136.64.138/git/lava-dispatcher /home/lava/lava-dispatcher \
-# && cd /home/lava/lava-dispatcher \
-# && git checkout -b wip 250e29bdef3ae30954f57f852d251fe776d6b180 \
-# && git clone -b proj/add_wiced git://10.136.64.138/git/lava-server /home/lava/lava-server \
-# && cd /home/lava/lava-server \
-# && git checkout -b wip e1866b72f32ad9e61ae11bad25519a1b9b70d9d7 \
-# && echo "CORTEX-M3: add build then install capability to debian-dev-build.sh" \
-# && echo "cd \${DIR} && dpkg -i *.deb" >> /home/lava/lava-server/share/debian-dev-build.sh \
-# && echo "CORTEX-M3: Installing patched versions of dispatcher & server" \
-# && cd /home/lava/lava-dispatcher && /home/lava/lava-server/share/debian-dev-build.sh -p lava-dispatcher \
-# && cd /home/lava/lava-server && /home/lava/lava-server/share/debian-dev-build.sh -p lava-server \
-# && /stop.sh
-
 COPY fileshare/ /root/fileshare-base/
 EXPOSE 22 80 5555 5556
 # Create a admin user (Insecure note, this creates a default user, username: admin/admin)
