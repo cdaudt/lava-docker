@@ -89,16 +89,12 @@ RUN \
  && a2enmod proxy \
  && a2enmod proxy_http
 
-RUN service gunicorn restart \
- && service apache2 restart
-
 # Add services helper utilities to start and stop LAVA
 COPY stop.sh .
 COPY start.sh .
 COPY cfg_postgres.sh .
 
 RUN a2ensite lava-server \
- && /stop.sh \
  && rm -rf /var/lib/apt/lists/*
 
 # Add lava user with super-user privilege
