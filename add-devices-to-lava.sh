@@ -28,4 +28,3 @@ mkdir -p /etc/dispatcher-config/devices
 devicename=943907AEVAL1F-1
 devicetype=943907AEVAL1F
 ## Add device
-lava-server manage device-dictionary --hostname $devicename --import /etc/dispatcher-config/devices/$devicename.jinja2

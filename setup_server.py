@@ -168,6 +168,20 @@ def add_device(server, basedir, dev):
         os.chdir(basedir)
         shutil.copyfile(dev['file'],
                         dst)
+
+    # Now add config to device dictionary
+    dev_dict_add = [
+        'lava-server',
+        'manage',
+        'device-dictionary',
+        '--hostname',
+        dev['name'],
+        '--import',
+        dst
+    ]
+    subprocess.call(dev_dict_add)
+
+
 def myargs(argv):
   parser = OptionParser()
   parser.add_option("-u", "--url", dest="url", action="store", type="string",
