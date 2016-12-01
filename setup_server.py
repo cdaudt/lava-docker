@@ -8,27 +8,27 @@ import tempfile
 import requests
 import urlparse
 
-def add_worker(url, worker):
+def add_worker(server, worker):
     # Sequence is:
     # GET /accounts/login -> cookies1
     # POST /admin/login(cookies1,username,password) -> cookies2
     # POST /admin/lava_scheduler_app/worker/add(cookies2,hostname)
     print("Adding worker:{} to URL:{}".
-            format(worker['name'], url))
-    if url == None:
+            format(worker['name'], server['url']))
+    if server['url'] == None:
         raise Exception("Need URL")
 
-    resp = requests.get(urlparse.urljoin(url, '/accounts/login/'))
+    resp = requests.get(urlparse.urljoin(server['url'], '/accounts/login/'))
     #print "Get Cookies: result= {} cookies= {}".format(resp, resp.cookies);
     #print "Get Cookies:text={}".format(resp.text);
 
     auth = {
      'csrfmiddlewaretoken': resp.cookies['csrftoken'],
-     'username': 'admin',
-     'password': 'admin'
+     'username': server['username'],
+     'password': server['password']
     }
 
-    login = requests.post(urlparse.urljoin(url, '/admin/login/'),
+    login = requests.post(urlparse.urljoin(server['url'], '/admin/login/'),
                             data=auth,
                             cookies=resp.cookies,
                             allow_redirects=False)
@@ -40,35 +40,34 @@ def add_worker(url, worker):
      'hostname': worker['name']
     }
 
-    worker = requests.post(urlparse.urljoin(url,
+    worker = requests.post(urlparse.urljoin(server['url'],
                                 '/admin/lava_scheduler_app/worker/add/'),
                             data=worker_req,
                             cookies=login.cookies)
     #print "Worker:result= {} cookies= {}".format(worker, worker.cookies.keys);
     #print "Worker:text={}".format(worker.text);
 
-def add_devicetype(url, dt):
+def add_devicetype(server, dt):
     # Sequence is:
     # GET /accounts/login -> cookies1
     # POST /admin/login(cookies1,username,password) -> cookies2
     # POST /admin/lava_scheduler_app/devicetype/add(cookies2,devicetype)
-
     print("Adding devicetype:{} to URL:{}".
-            format(dt['name'], url))
-    if url == None:
+            format(dt['name'], server['url']))
+    if server['url'] == None:
         raise Exception("Need URL")
 
-    resp = requests.get(urlparse.urljoin(url, '/accounts/login/'))
+    resp = requests.get(urlparse.urljoin(server['url'], '/accounts/login/'))
     #print "Get Cookies: result= {} cookies= {}".format(resp, resp.cookies);
     #print "Get Cookies:text={}".format(resp.text);
 
     auth = {
      'csrfmiddlewaretoken': resp.cookies['csrftoken'],
-     'username': 'admin',
-     'password': 'admin'
+     'username': server['username'],
+     'password': server['password']
     }
 
-    login = requests.post(urlparse.urljoin(url, '/admin/login/'),
+    login = requests.post(urlparse.urljoin(server['url'], '/admin/login/'),
                             data=auth,
                             cookies=resp.cookies,
                             allow_redirects=False)
@@ -84,7 +83,7 @@ def add_devicetype(url, dt):
      'health_denominator': '0'
     }
 
-    dt = requests.post(urlparse.urljoin(url,
+    dt = requests.post(urlparse.urljoin(server['url'],
                                 '/admin/lava_scheduler_app/devicetype/add/'),
                             data=dt_req,
                             cookies=login.cookies)
@@ -103,6 +102,11 @@ def main(argv):
   (options, args) = myargs(argv)
   print "options={} args={}".format(str(options), str(args))
   ini_filename=args[0]
+  server = {
+    'url': options.url,
+    'username': 'admin',
+    'password': 'admin'
+  }
   basedir=os.path.dirname(ini_filename);
   print "initfile=", ini_filename
   ini_file = open(ini_filename, 'r')
@@ -110,11 +114,11 @@ def main(argv):
   ini_file.close()
   if 'workers' in ini:
       for worker in ini['workers']:
-            add_worker(options.url, worker)
+            add_worker(server, worker)
 
   if 'devicetypes' in ini:
       for dt in ini['devicetypes']:
-            add_devicetype(options.url, dt)
+            add_devicetype(server, dt)
 
 if __name__ == "__main__":
   main(sys.argv[1:])
