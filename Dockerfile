@@ -76,6 +76,11 @@ RUN \
  xsltproc \
  python-mock
 
+RUN \
+ DEBIAN_FRONTEND=noninteractive apt-get install -y \
+ python-pip
+
+
 COPY lava-server_*deb /root
 
 RUN \
