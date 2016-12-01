@@ -11,7 +11,6 @@ fi
 lavaurl=http://localhost
 tools_path="${tools_path:-/home/lava/bin}"
 hostn=$(hostname)
-WORKER=dispatcher-3
 
 #obtain the csrf token
 data=$(curl -s -c ${tools_path}/cookies.txt $lavaurl/accounts/login/); tail ${tools_path}/cookies.txt
@@ -21,14 +20,8 @@ csrf="csrfmiddlewaretoken="$(grep csrftoken ${tools_path}/cookies.txt | cut -d$'
 login=$csrf\&username=$adminuser\&password=$adminpass; echo $login
 curl -b ${tools_path}/cookies.txt -c ${tools_path}/cookies.txt -d $login -X POST $lavaurl/admin/login/
 
-#create lava-slave
-csrf="csrfmiddlewaretoken="$(grep csrftoken ${tools_path}/cookies.txt | cut -d$'\t' -f 7); echo "$csrf"
-work=$csrf\&hostname="lava-slave"; echo $login
-curl -b ${tools_path}/cookies.txt -c ${tools_path}/cookies.txt -d $work -X POST $lavaurl/admin/lava_scheduler_app/worker/add/
-
-csrf="csrfmiddlewaretoken="$(grep csrftoken ${tools_path}/cookies.txt | cut -d$'\t' -f 7); echo "$csrf"
-work=$csrf\&hostname="${WORKER}"; echo $login
-curl -b ${tools_path}/cookies.txt -c ${tools_path}/cookies.txt -d $work -X POST $lavaurl/admin/lava_scheduler_app/worker/add/
+#create workers
+${tools_path}/setup_server.py --url ${lavaurl} /fileshare/cfg/server.json
 
 mkdir -p /etc/dispatcher-config/devices
 

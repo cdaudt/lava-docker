@@ -111,7 +111,11 @@ RUN useradd -m -G plugdev lava \
  && chown -R lava:lava /home/lava/bin /home/lava/.ssh
 
 # Add misc utilities
-COPY createsuperuser.sh add-devices-to-lava.sh getAPItoken.sh lava-credentials.txt /home/lava/bin/
+COPY setup_server.py \
+ createsuperuser.sh \
+ add-devices-to-lava.sh \
+ getAPItoken.sh \
+ lava-credentials.txt /home/lava/bin/
 
 #WICED devices
 COPY 943907AEVAL1F-1.jinja2 /etc/dispatcher-config/devices/
