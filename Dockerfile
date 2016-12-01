@@ -118,8 +118,9 @@ COPY setup_server.py \
  lava-credentials.txt /home/lava/bin/
 
 #WICED devices
-COPY 943907AEVAL1F-1.jinja2 /etc/dispatcher-config/devices/
-COPY 943907AEVAL1F.jinja2   /etc/lava-server/dispatcher-config/device-types/
+RUN mkdir -p /home/lava/cfg-files
+COPY 943907AEVAL1F-1.jinja2 /home/lava/cfg-files
+COPY 943907AEVAL1F.jinja2   /home/lava/cfg-files
 
 COPY fileshare/ /root/fileshare-base/
 EXPOSE 22 80 5555 5556

@@ -7,8 +7,20 @@ import json
 import tempfile
 import requests
 import urlparse
+import shutil
+import errno
 
-def add_worker(server, worker):
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
+def add_worker(server, basedir, worker):
     # Sequence is:
     # GET /accounts/login -> cookies1
     # POST /admin/login(cookies1,username,password) -> cookies2
@@ -47,7 +59,7 @@ def add_worker(server, worker):
     #print "Worker:result= {} cookies= {}".format(worker, worker.cookies.keys);
     #print "Worker:text={}".format(worker.text);
 
-def add_devicetype(server, dt):
+def add_devicetype(server, basedir, dt):
     # Sequence is:
     # GET /accounts/login -> cookies1
     # POST /admin/login(cookies1,username,password) -> cookies2
@@ -83,14 +95,26 @@ def add_devicetype(server, dt):
      'health_denominator': '0'
     }
 
-    dt = requests.post(urlparse.urljoin(server['url'],
+    dtresp = requests.post(urlparse.urljoin(server['url'],
                                 '/admin/lava_scheduler_app/devicetype/add/'),
                             data=dt_req,
                             cookies=login.cookies)
-    #print "DT:result= {} cookies= {}".format(dt, dt.cookies);
-    #print "DT:text={}".format(dt.text);
+    #print "DT:result= {} cookies= {}".format(dtresp, dtresp.cookies);
+    #print "DT:text={}".format(dtresp.text);
 
-def add_device(server, dev):
+    #Install devicetype file if provided.
+    # Note filename has to == devicetype name
+    dst = os.path.join('/etc/lava-server/dispatcher-config/device-types',
+                        dt['name'] + ".jinja2")
+    mkdir_p(os.path.dirname(dst))
+
+    if 'file' in dt:
+        os.chdir(basedir)
+        shutil.copyfile(dt['file'],
+                        dst)
+
+
+def add_device(server, basedir, dev):
     # Sequence is:
     # GET /accounts/login -> cookies1
     # POST /admin/login(cookies1,username,password) -> cookies2
@@ -128,14 +152,22 @@ def add_device(server, dev):
      'worker_host': dev['worker']
     }
 
-    dev = requests.post(urlparse.urljoin(server['url'],
+    devresp = requests.post(urlparse.urljoin(server['url'],
                                 '/admin/lava_scheduler_app/device/add/'),
                             data=dev_req,
                             cookies=login.cookies)
-    #print "Dev:result= {} cookies= {}".format(dev, dev.cookies);
-    #print "Dev:text={}".format(dev.text);
+    #print "Dev:result= {} cookies= {}".format(devresp, devresp.cookies);
+    #print "Dev:text={}".format(devresp.text);
 
-
+    #Install device file if provided.
+    # Note filename has to == devicetype name
+    dst = os.path.join('/etc/dispatcher-config/devices',
+                        dev['name'] + ".jinja2")
+    mkdir_p(os.path.dirname(dst))
+    if 'file' in dev:
+        os.chdir(basedir)
+        shutil.copyfile(dev['file'],
+                        dst)
 def myargs(argv):
   parser = OptionParser()
   parser.add_option("-u", "--url", dest="url", action="store", type="string",
@@ -159,15 +191,15 @@ def main(argv):
   ini_file.close()
   if 'workers' in ini:
       for worker in ini['workers']:
-            add_worker(server, worker)
+            add_worker(server, basedir, worker)
 
   if 'devicetypes' in ini:
       for dt in ini['devicetypes']:
-            add_devicetype(server, dt)
+            add_devicetype(server, basedir, dt)
 
   if 'devices' in ini:
       for dev in ini['devices']:
-            add_device(server, dev)
+            add_device(server, basedir, dev)
 
 if __name__ == "__main__":
   main(sys.argv[1:])
