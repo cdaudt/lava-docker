@@ -1,8 +1,0 @@
-{% extends 'ifc6410plus.jinja2' %}
-
-{% set connection_command = "telnet 10.136.64.31 2000" %}
-{% set hard_reset_command = "/usr/bin/pduclient --daemon map-lava-server --hostname csddev1.ric.broadcom.com --command reboot --port 07" %}
-{% set power_off_command  = "/usr/bin/pduclient --daemon map-lava-server --hostname csddev1.ric.broadcom.com --command off --port 07" %}
-{% set power_on_command   = "/usr/bin/pduclient --daemon map-lava-server --hostname csddev1.ric.broadcom.com --command on --port 07" %}
-{% set fastboot_serial_number = "69b51dcd" %}
-{% set device_path = '/dev/bus/usb/002' %}

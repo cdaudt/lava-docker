@@ -95,7 +95,6 @@ RUN \
  && a2enmod proxy_http
 
 # Add services helper utilities to start and stop LAVA
-COPY stop.sh .
 COPY start.sh .
 COPY cfg_postgres.sh .
 
@@ -112,7 +111,7 @@ RUN useradd -m -G plugdev lava \
 
 # Add misc utilities
 COPY setup_server.py \
- lava-credentials.txt /home/lava/bin/
+ /home/lava/bin/
 
 #WICED devices
 RUN mkdir -p /home/lava/cfg-files

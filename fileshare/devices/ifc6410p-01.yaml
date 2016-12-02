@@ -1,5 +1,0 @@
-commands:
-   connect: telnet localhost 2222
-   hard_reset: /usr/bin/pduclient --daemon map-lava-server --hostname csddev1.ric.broadcom.com --command reboot --port 07
-   power_off: /usr/bin/pduclient --daemon map-lava-server --hostname csddev1.ric.broadcom.com --command off --port 07
-   power_on: /usr/bin/pduclient --daemon map-lava-server --hostname csddev1.ric.broadcom.com --command on --port 07
