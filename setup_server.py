@@ -9,6 +9,7 @@ import requests
 import urlparse
 import shutil
 import errno
+import pexpect
 
 
 def mkdir_p(path):
@@ -113,7 +114,6 @@ def add_devicetype(server, basedir, dt):
         shutil.copyfile(dt['file'],
                         dst)
 
-
 def add_device(server, basedir, dev):
     # Sequence is:
     # GET /accounts/login -> cookies1
@@ -181,6 +181,22 @@ def add_device(server, basedir, dev):
     ]
     subprocess.call(dev_dict_add)
 
+def add_superuser(server, basedir, su):
+    print("Adding superuser:{} email:{}"
+            .format(su['username'],su['email']))
+    p = pexpect.spawn('lava-server manage createsuperuser')
+    #log = file('setup_server.log', 'w')
+    #p.logfile = log
+    p.expect_exact("Username (leave blank to use 'root'):")
+    p.sendline(su['username'])
+    p.expect_exact("Email address:")
+    p.sendline(su['email'])
+    p.expect_exact("Password:")
+    p.sendline(su['password'])
+    p.expect_exact("Password (again):")
+    p.sendline(su['password'])
+    p.expect_exact("Superuser created successfully.")
+
 
 def myargs(argv):
   parser = OptionParser()
@@ -195,14 +211,21 @@ def main(argv):
   ini_filename=args[0]
   server = {
     'url': options.url,
-    'username': 'admin',
-    'password': 'admin'
   }
   basedir=os.path.dirname(ini_filename);
   print "initfile=", ini_filename
   ini_file = open(ini_filename, 'r')
   ini = json.loads(ini_file.read())
   ini_file.close()
+  if 'superusers' in ini:
+      for superuser in ini['superusers']:
+          #TODO: Make selecting superuser to use configurable
+          #for now assume there's just 1
+          server['username'] = superuser['username']
+          server['password'] = superuser['password']
+          if superuser['create'] == 'yes':
+                add_superuser(server, basedir, superuser)
+
   if 'workers' in ini:
       for worker in ini['workers']:
             add_worker(server, basedir, worker)
