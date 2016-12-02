@@ -113,11 +113,6 @@ RUN useradd -m -G plugdev lava \
 COPY setup_server.py \
  /home/lava/bin/
 
-#WICED devices
-RUN mkdir -p /home/lava/cfg-files
-COPY 943907AEVAL1F-1.jinja2 /home/lava/cfg-files
-COPY 943907AEVAL1F.jinja2   /home/lava/cfg-files
-
 COPY fileshare/ /root/fileshare-base/
 EXPOSE 22 80 5555 5556
 # Create a admin user (Insecure note, this creates a default user, username: admin/admin)
