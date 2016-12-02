@@ -113,7 +113,6 @@ RUN useradd -m -G plugdev lava \
 # Add misc utilities
 COPY setup_server.py \
  add-devices-to-lava.sh \
- getAPItoken.sh \
  lava-credentials.txt /home/lava/bin/
 
 #WICED devices
@@ -126,6 +125,5 @@ EXPOSE 22 80 5555 5556
 # Create a admin user (Insecure note, this creates a default user, username: admin/admin)
 # Add devices
 CMD /start.sh && \
-  /home/lava/bin/getAPItoken.sh && \
   /home/lava/bin/add-devices-to-lava.sh 41 && \
   bash

@@ -10,6 +10,9 @@ import urlparse
 import shutil
 import errno
 import pexpect
+import random
+import string
+import re
 
 
 def mkdir_p(path):
@@ -197,6 +200,69 @@ def add_superuser(server, basedir, su):
     p.sendline(su['password'])
     p.expect_exact("Superuser created successfully.")
 
+def add_apikey(server, basedir, apikey):
+    # Sequence is:
+    # GET /accounts/login -> cookies1
+    # POST /admin/login(cookies1,username,password) -> cookies2
+    # POST /admin/lava_scheduler_app/device/add(cookies2,device)
+    print("Adding apikey:{} to URL:{}".
+            format(apikey['file'], server['url']))
+    if server['url'] == None:
+        raise Exception("Need URL")
+
+    resp = requests.get(urlparse.urljoin(server['url'], '/accounts/login/'))
+    #print "Get Cookies: result= {} cookies= {}".format(resp, resp.cookies);
+    #print "Get Cookies:text={}".format(resp.text);
+
+    auth = {
+     'csrfmiddlewaretoken': resp.cookies['csrftoken'],
+     'username': server['username'],
+     'password': server['password']
+    }
+
+    login = requests.post(urlparse.urljoin(server['url'], '/admin/login/'),
+                            data=auth,
+                            cookies=resp.cookies,
+                            allow_redirects=False)
+    #print "Login:result= {} cookies= {}".format(login, login.cookies.keys);
+    #print "Login:text={}".format(login.text);
+    desc = ''.join(random.SystemRandom().
+                choice(string.ascii_uppercase + string.digits)
+                for _ in range(8))
+    print("Description:{}".format(desc))
+    apik_req = {
+     'csrfmiddlewaretoken': login.cookies['csrftoken'],
+     'description': desc,
+    }
+
+    apikresp = requests.post(urlparse.urljoin(server['url'],
+                                '/api/tokens/create/'),
+                            data=apik_req,
+                            cookies=login.cookies)
+    #print "APIKey:result= {} cookies= {}".format(apikresp, apikresp.cookies)
+    #print "APIKey:{}".format(str(apikresp.content))
+    count = 0
+    keyline = -1
+    #TODO: Find key # and add that to apikey file
+    for line in string.split(str(apikresp.content), '\n'):
+        count += 1
+        #print("Line[{}]:{}".format(count, line))
+        if keyline == count:
+            g = re.search(r'<code>(.*)</code>', line)
+            if not g:
+                #print("Can't find code block")
+                raise Error("Unknown format in response")
+            genkey = g.group(1)
+            #print("Found key:{}".format(genkey))
+        if re.search(r'<p>'+desc+'</p>', line):
+            #print("**** MATCH")
+            keyline = count+1
+    if keyline == -1:
+        raise Error("Can't find key")
+    keyfile = open(apikey['file'],'w')
+    keyfile.write("{}\n".format(genkey))
+    keyfile.close()
+
 
 def myargs(argv):
   parser = OptionParser()
@@ -225,6 +291,10 @@ def main(argv):
           server['password'] = superuser['password']
           if superuser['create'] == 'yes':
                 add_superuser(server, basedir, superuser)
+
+  if 'apikeys' in ini:
+      for apikey in ini['apikeys']:
+            add_apikey(server, basedir, apikey)
 
   if 'workers' in ini:
       for worker in ini['workers']:
