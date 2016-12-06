@@ -1,0 +1,34 @@
+{
+  "superusers": [
+    {
+      "username": "admin",
+      "password": "admin",
+      "email":    "admin@localhost",
+      "create":   "yes"
+    }
+  ],
+  "workers": [
+    {
+      "name": "dispatch3"
+    }
+  ],
+  "devicetypes": [
+    {
+      "name": "943907AEVAL1F",
+      "file": "/fileshare/cfg/943907AEVAL1F.jinja2"
+    }
+  ],
+  "devices": [
+    {
+      "name":       "943907AEVAL1F-1",
+      "worker":     "dispatch3",
+      "devicetype": "943907AEVAL1F",
+      "file":       "/fileshare/cfg/943907AEVAL1F-1.jinja2"
+    }
+  ],
+  "apikeys": [
+    {
+      "file": "/home/lava/bin/apikeys.txt"
+    }
+  ]
+}
