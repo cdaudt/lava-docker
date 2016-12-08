@@ -27,11 +27,11 @@ install_database()
 {
     # check postgres is not just installed but actually ready.
     pg=1
-    limit=3
+    limit=60
     while [ $pg -le $limit ]; do
         if ! pg_isready -q; then
             echo "[$pg] Postgres not ready for connection to $LAVA_DB_NAME on port $LAVA_DB_PORT.PGHOST=${PGHOST}"
-            sleep 1
+            sleep 2
         else
             break
         fi
