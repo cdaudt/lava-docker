@@ -119,4 +119,4 @@ EXPOSE 22 80 5555 5556
 # Add devices
 CMD /start.sh && \
   /home/lava/bin/setup_server.py --url http://localhost /fileshare/cfg/server.json && \
-  bash
+  tail -F /var/log/lava-server/lava*log
