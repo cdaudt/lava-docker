@@ -30,3 +30,6 @@ start lava-slave
 
 postgres-ready
 service apache2 reload #added after the website not running a few times on boot
+
+echo "Waiting for apache to settle"
+sleep 30
